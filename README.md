@@ -1,7 +1,11 @@
 # couch-tv-plus
 
-A fork of [Seagey/couch-tv](https://github.com/Seagey/couch-tv) (MIT, all credit for the original to Seagey),
-tuned on an Android projector. What this fork adds to the "lives on the TV" app (option C):
+> **Credit:** this is built on **[couch-tv](https://github.com/Seagey/couch-tv) by
+> [Seagey](https://github.com/Seagey)**. The home screen, phone remote, TV app, bridge, Samsung and LG
+> versions and almost all of the code are Seagey's work, shared under the MIT licence (see [LICENSE](LICENSE),
+> Copyright (c) 2026 Seagey). Thank you, Seagey. If you like this, star and support the original repo.
+
+This fork was tuned on an Android projector. What this fork adds to the "lives on the TV" app (option C):
 
 - **A centred dock** of wide dark cards with each app's own logo, glowing in that app's colour, with a soft
   light of the same colour behind the home. Netflix and the Play Store are always in the dock.
@@ -16,6 +20,8 @@ tuned on an Android projector. What this fork adds to the "lives on the TV" app 
   setup page. Ask is hidden on the phone until a key is set.
 
 ---
+
+*Everything below is Seagey's original couch-tv README.*
 
 # couch-tv
 
