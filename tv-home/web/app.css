@@ -1076,3 +1076,9 @@ html.fts-on .fts { display: flex; position: fixed; top: 0; right: 0; bottom: 0; 
 html:not(.glow-look) .ambient { display: none; }
 html:not(.glow-look) .theme-night .app.focus .face, html:not(.glow-look) .glass.theme-night .app.focus .face {
   box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.9), 0 1.25rem 2.5rem rgba(0, 0, 0, 0.45); }
+
+/* ================= All apps: every app with its name, OK opens it ================= */
+html.expanded.theme-night .grid { row-gap: 3.4rem; padding-bottom: 3.6rem; }
+html.expanded.theme-night .app .label { display: block; top: calc(100% + 0.6rem); left: -0.5rem; right: -0.5rem; width: auto;
+  font-size: 1.2rem; line-height: 1.6rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.85; }
+html.expanded.theme-night .app.focus .label { opacity: 1; }
