@@ -7,11 +7,11 @@
 
 This fork was tuned on an Android projector. What this fork adds to the "lives on the TV" app (option C):
 
-- **A centred dock** of wide dark cards with each app's own logo, glowing in that app's colour, with a soft
-  light of the same colour behind the home. Netflix and the Play Store are always in the dock.
+- **A centred dock** of wide dark cards with each app's own logo. Netflix and the Play Store are always in
+  the dock.
 - **A drawer**: press down on the dock for inputs (HDMI, screen mirroring), shortcuts and the weather.
-- **Glow style**: an optional look with a plain background lit in the focused app's colour and a big clock
-  on the left, switchable in Home settings and in the drawer.
+- **Minimalist mode**: an optional look with a plain background lit in the focused app's colour, the focused
+  app glowing in that colour, and a big clock on the left, switchable in Home settings and in the drawer.
 - **First-time setup**: language, welcome, pick the look, and a QR code to open the phone remote.
 - **Dutch** as a language, and the new words in every language.
 - **Fast phone remote keys**: one key sender stays running on the TV (`KeyInjector`), so a key press takes

@@ -1465,7 +1465,7 @@
     });
   }
 
-  // ---------------- Glow style ----------------
+  // ---------------- Minimalist mode ----------------
   var GLOW = false, ccTimer = null, ccWxAt = 0;
   function glowLook(on) {
     GLOW = !!on;
@@ -1581,7 +1581,7 @@
     { grp: 1, icon: DR_ICON.apps, key: "dr_all", label: "All Apps", act: function () { closeDrawer(); expanded = true; renderGrid(); zone = "grid"; g = 0; paintFocus(); } },
     { grp: 1, icon: ICONS.gear, key: "dr_home", label: "Home Settings", act: function () { closeDrawer(); openSettings(); } },
     { grp: 1, icon: DR_ICON.tv, key: "dr_tv", label: "TV Settings", act: function () { closeDrawer(); openTvSettings(); } },
-    { grp: 1, icon: DR_ICON.style, key: "dr_style", label: "Glow Style", act: function () { toggleGlow(); closeDrawer(); paintFocus(); } },
+    { grp: 1, icon: DR_ICON.style, key: "dr_style", label: "Minimalist Mode", act: function () { toggleGlow(); closeDrawer(); paintFocus(); } },
     { grp: 1, icon: DR_ICON.cast, key: "dr_mirror", label: "Screen Mirroring", act: function () { startComp("com.softwinner.miracastReceiver", "com.softwinner.miracastReceiver.Miracast"); } }
   ];
   var di = 0;
