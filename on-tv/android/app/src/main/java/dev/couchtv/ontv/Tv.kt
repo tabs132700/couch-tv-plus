@@ -59,9 +59,13 @@ object Tv {
         ctx.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
     } catch (e: Exception) { emptySet() }
 
+    // Every app that can be opened: TV apps, and phone-style apps too (on projectors Netflix, the Miracast
+    // receiver and the maker's own tools often only have a normal launcher). The TV entry wins when an app has both.
     fun tvLaunchables(): List<android.content.pm.ResolveInfo> {
-        val q = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
-        return ctx.packageManager.queryIntentActivities(q, 0).distinctBy { it.activityInfo.packageName }
+        val pm = ctx.packageManager
+        val tv = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER), 0)
+        val phone = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+        return (tv + phone).distinctBy { it.activityInfo.packageName }
     }
 
     /** Opens an app. ADB when connected (works from the background on every TV), else an intent. */
