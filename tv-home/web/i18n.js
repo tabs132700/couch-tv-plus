@@ -71,7 +71,7 @@
     that_app: "That app",
     ctx_move: "Move",
     ctx_hide: "Hide from home",
-    ctx_uninstall: "Uninstall",
+    ctx_uninstall: "Delete",
     ctx_info: "App info",
     ctx_hint: "Up and down to choose, OK to do it, Back to close",
     ctx_hidden: "Hidden. Show it again in Settings, Apps.",
@@ -2082,6 +2082,145 @@
   // Dutch (the rest of its words fall back to English) and the setup and drawer words in every language
   S.nl = {};
   var EXTRA_WORDS = {"en": {"fts_lang": "Choose your language", "fts_welcome": "Welcome", "fts_welcome_sub": "Let’s set up your projector. It only takes a moment.", "fts_start": "Get started", "fts_style": "Choose your home screen", "fts_style_sub": "You can change this any time in Home settings.", "fts_scenes": "Scenes", "fts_scenes_sub": "Photos of nature that change through the day, with a big glass clock", "fts_glow_sub": "A calm background that takes the colour of the app you are on", "fts_phone": "Use your phone as the remote", "fts_p1": "Connect your phone to the same Wi-Fi as the projector.", "fts_p2": "Scan the code with your camera, or open", "fts_p3": "Type the 6 digit code the projector shows.", "fts_done": "Done", "fts_skip": "Skip", "dr_inputs": "Inputs", "dr_shortcuts": "Shortcuts", "dr_all": "All Apps", "dr_home": "Home Settings", "dr_tv": "TV Settings", "dr_style": "Minimalist mode", "dr_mirror": "Screen Mirroring", "wx_sunrise": "Sunrise", "wx_sunset": "Sunset", "glow_style": "Minimalist mode", "fts_again": "First-time setup", "fts_run": "Run again"}, "nl": {"fts_lang": "Kies je taal", "fts_welcome": "Welkom", "fts_welcome_sub": "Laten we je projector instellen. Het duurt maar even.", "fts_start": "Aan de slag", "fts_style": "Kies je startscherm", "fts_style_sub": "Je kunt dit altijd wijzigen in de instellingen.", "fts_scenes": "Scènes", "fts_scenes_sub": "Natuurfoto’s die door de dag heen veranderen, met een grote glazen klok", "fts_glow_sub": "Een rustige achtergrond die de kleur aanneemt van de app waarop je staat", "fts_phone": "Gebruik je telefoon als afstandsbediening", "fts_p1": "Verbind je telefoon met hetzelfde wifi-netwerk als de projector.", "fts_p2": "Scan de code met je camera, of open", "fts_p3": "Typ de 6-cijferige code die de projector toont.", "fts_done": "Klaar", "fts_skip": "Overslaan", "dr_inputs": "Ingangen", "dr_shortcuts": "Snelkoppelingen", "dr_all": "Alle apps", "dr_home": "Instellingen", "dr_tv": "Tv-instellingen", "dr_style": "Minimalistische modus", "dr_mirror": "Scherm delen", "wx_sunrise": "Zonsopkomst", "wx_sunset": "Zonsondergang", "glow_style": "Minimalistische modus", "fts_again": "Eerste installatie", "fts_run": "Opnieuw starten"}, "es": {"fts_lang": "Elige tu idioma", "fts_welcome": "Bienvenido", "fts_welcome_sub": "Vamos a configurar tu proyector. Solo tarda un momento.", "fts_start": "Empezar", "fts_style": "Elige tu pantalla de inicio", "fts_style_sub": "Puedes cambiarlo cuando quieras en los ajustes.", "fts_scenes": "Escenas", "fts_scenes_sub": "Fotos de la naturaleza que cambian a lo largo del día, con un gran reloj de cristal", "fts_glow_sub": "Un fondo tranquilo que toma el color de la app en la que estás", "fts_phone": "Usa tu móvil como mando", "fts_p1": "Conecta tu móvil a la misma wifi que el proyector.", "fts_p2": "Escanea el código con la cámara o abre", "fts_p3": "Escribe el código de 6 dígitos que muestra el proyector.", "fts_done": "Listo", "fts_skip": "Omitir", "dr_inputs": "Entradas", "dr_shortcuts": "Accesos directos", "dr_all": "Todas las apps", "dr_home": "Ajustes de inicio", "dr_tv": "Ajustes de TV", "dr_style": "Modo minimalista", "dr_mirror": "Duplicar pantalla", "wx_sunrise": "Amanecer", "wx_sunset": "Atardecer", "glow_style": "Modo minimalista", "fts_again": "Configuración inicial", "fts_run": "Repetir"}, "it": {"fts_lang": "Scegli la lingua", "fts_welcome": "Benvenuto", "fts_welcome_sub": "Configuriamo il tuo proiettore. Ci vuole solo un momento.", "fts_start": "Inizia", "fts_style": "Scegli la schermata home", "fts_style_sub": "Puoi cambiarla quando vuoi nelle impostazioni.", "fts_scenes": "Scene", "fts_scenes_sub": "Foto della natura che cambiano durante il giorno, con un grande orologio di vetro", "fts_glow_sub": "Uno sfondo calmo che prende il colore dell’app su cui sei", "fts_phone": "Usa il telefono come telecomando", "fts_p1": "Collega il telefono alla stessa rete Wi-Fi del proiettore.", "fts_p2": "Inquadra il codice con la fotocamera, oppure apri", "fts_p3": "Digita il codice di 6 cifre mostrato dal proiettore.", "fts_done": "Fatto", "fts_skip": "Salta", "dr_inputs": "Ingressi", "dr_shortcuts": "Scorciatoie", "dr_all": "Tutte le app", "dr_home": "Impostazioni home", "dr_tv": "Impostazioni TV", "dr_style": "Modalità minimalista", "dr_mirror": "Duplica schermo", "wx_sunrise": "Alba", "wx_sunset": "Tramonto", "glow_style": "Modalità minimalista", "fts_again": "Configurazione iniziale", "fts_run": "Ripeti"}, "de": {"fts_lang": "Sprache wählen", "fts_welcome": "Willkommen", "fts_welcome_sub": "Lass uns deinen Projektor einrichten. Das dauert nur einen Moment.", "fts_start": "Los geht’s", "fts_style": "Wähle deinen Startbildschirm", "fts_style_sub": "Du kannst das jederzeit in den Einstellungen ändern.", "fts_scenes": "Szenen", "fts_scenes_sub": "Naturfotos, die sich im Laufe des Tages ändern, mit einer großen Glasuhr", "fts_glow_sub": "Ein ruhiger Hintergrund, der die Farbe der gewählten App annimmt", "fts_phone": "Nutze dein Handy als Fernbedienung", "fts_p1": "Verbinde dein Handy mit demselben WLAN wie den Projektor.", "fts_p2": "Scanne den Code mit der Kamera oder öffne", "fts_p3": "Gib den 6-stelligen Code ein, den der Projektor zeigt.", "fts_done": "Fertig", "fts_skip": "Überspringen", "dr_inputs": "Eingänge", "dr_shortcuts": "Verknüpfungen", "dr_all": "Alle Apps", "dr_home": "Home-Einstellungen", "dr_tv": "TV-Einstellungen", "dr_style": "Minimalistischer Modus", "dr_mirror": "Bildschirm spiegeln", "wx_sunrise": "Sonnenaufgang", "wx_sunset": "Sonnenuntergang", "glow_style": "Minimalistischer Modus", "fts_again": "Ersteinrichtung", "fts_run": "Erneut starten"}, "fr": {"fts_lang": "Choisissez votre langue", "fts_welcome": "Bienvenue", "fts_welcome_sub": "Configurons votre projecteur. Cela ne prend qu’un instant.", "fts_start": "Commencer", "fts_style": "Choisissez votre écran d’accueil", "fts_style_sub": "Vous pouvez le changer à tout moment dans les réglages.", "fts_scenes": "Scènes", "fts_scenes_sub": "Des photos de nature qui changent au fil de la journée, avec une grande horloge en verre", "fts_glow_sub": "Un fond apaisant qui prend la couleur de l’app sélectionnée", "fts_phone": "Utilisez votre téléphone comme télécommande", "fts_p1": "Connectez votre téléphone au même Wi-Fi que le projecteur.", "fts_p2": "Scannez le code avec l’appareil photo, ou ouvrez", "fts_p3": "Saisissez le code à 6 chiffres affiché par le projecteur.", "fts_done": "Terminé", "fts_skip": "Passer", "dr_inputs": "Entrées", "dr_shortcuts": "Raccourcis", "dr_all": "Toutes les apps", "dr_home": "Réglages de l’accueil", "dr_tv": "Réglages TV", "dr_style": "Mode minimaliste", "dr_mirror": "Recopie d’écran", "wx_sunrise": "Lever du soleil", "wx_sunset": "Coucher du soleil", "glow_style": "Mode minimaliste", "fts_again": "Première configuration", "fts_run": "Relancer"}, "tr": {"fts_lang": "Dilini seç", "fts_welcome": "Hoş geldin", "fts_welcome_sub": "Projektörünü kuralım. Sadece bir dakika sürer.", "fts_start": "Başla", "fts_style": "Ana ekranını seç", "fts_style_sub": "Bunu istediğin zaman ayarlardan değiştirebilirsin.", "fts_scenes": "Sahneler", "fts_scenes_sub": "Gün boyunca değişen doğa fotoğrafları ve büyük cam saat", "fts_glow_sub": "Üzerinde olduğun uygulamanın rengini alan sakin bir arka plan", "fts_phone": "Telefonunu kumanda olarak kullan", "fts_p1": "Telefonunu projektörle aynı Wi-Fi ağına bağla.", "fts_p2": "Kodu kamerayla tara veya şunu aç", "fts_p3": "Projektörün gösterdiği 6 haneli kodu yaz.", "fts_done": "Tamam", "fts_skip": "Atla", "dr_inputs": "Girişler", "dr_shortcuts": "Kısayollar", "dr_all": "Tüm uygulamalar", "dr_home": "Ana ekran ayarları", "dr_tv": "TV ayarları", "dr_style": "Minimalist mod", "dr_mirror": "Ekran yansıtma", "wx_sunrise": "Gün doğumu", "wx_sunset": "Gün batımı", "glow_style": "Minimalist mod", "fts_again": "İlk kurulum", "fts_run": "Yeniden çalıştır"}};
+  // screen mirroring help: iPhones use AirPlay (the projector shows up as an Apple TV), Android phones use Miracast
+  EXTRA_WORDS.en.mr_title = "Screen mirroring";
+  EXTRA_WORDS.en.mr_sub = "Show your phone, tablet or laptop on the projector.";
+  EXTRA_WORDS.en.mr_ios = "iPhone, iPad or Mac";
+  EXTRA_WORDS.en.mr_ios1 = "Be on the same Wi-Fi as the projector.";
+  EXTRA_WORDS.en.mr_ios2 = "Open Control Centre and tap Screen Mirroring.";
+  EXTRA_WORDS.en.mr_ios3 = "Choose the projector. It works straight away, from any screen.";
+  EXTRA_WORDS.en.mr_and = "Android or Windows";
+  EXTRA_WORDS.en.mr_and1 = "Press Start Android below.";
+  EXTRA_WORDS.en.mr_and2 = "On the phone, open Cast, Smart View or Screen mirror (Windows: press Win + K).";
+  EXTRA_WORDS.en.mr_and3 = "Choose the projector.";
+  EXTRA_WORDS.en.mr_start = "Start Android";
+  EXTRA_WORDS.en.mr_close = "Close";
+  EXTRA_WORDS.nl = EXTRA_WORDS.nl || {};
+  EXTRA_WORDS.nl.mr_title = "Scherm delen";
+  EXTRA_WORDS.nl.mr_sub = "Laat je telefoon, tablet of laptop zien op de projector.";
+  EXTRA_WORDS.nl.mr_ios = "iPhone, iPad of Mac";
+  EXTRA_WORDS.nl.mr_ios1 = "Zit op hetzelfde wifi-netwerk als de projector.";
+  EXTRA_WORDS.nl.mr_ios2 = "Open het bedieningspaneel en tik op Schermsynchronisatie.";
+  EXTRA_WORDS.nl.mr_ios3 = "Kies de projector. Het werkt meteen, vanaf elk scherm.";
+  EXTRA_WORDS.nl.mr_and = "Android of Windows";
+  EXTRA_WORDS.nl.mr_and1 = "Druk hieronder op Start Android.";
+  EXTRA_WORDS.nl.mr_and2 = "Open op de telefoon Casten, Smart View of Scherm spiegelen (Windows: Win + K).";
+  EXTRA_WORDS.nl.mr_and3 = "Kies de projector.";
+  EXTRA_WORDS.nl.mr_start = "Start Android";
+  EXTRA_WORDS.nl.mr_close = "Sluiten";
+  EXTRA_WORDS.en.mr_title = "Screen mirroring";
+  EXTRA_WORDS.en.mr_sub = "Show your phone, tablet or laptop on the projector.";
+  EXTRA_WORDS.en.mr_ios = "iPhone, iPad or Mac";
+  EXTRA_WORDS.en.mr_ios1 = "Be on the same Wi-Fi as the projector.";
+  EXTRA_WORDS.en.mr_ios2 = "Open Control Centre and tap Screen Mirroring.";
+  EXTRA_WORDS.en.mr_ios3 = "Choose the projector. It works straight away, from any screen.";
+  EXTRA_WORDS.en.mr_and = "Android or Windows";
+  EXTRA_WORDS.en.mr_and1 = "Press Start Android below.";
+  EXTRA_WORDS.en.mr_and2 = "On the phone, open Cast, Smart View or Screen mirror (Windows: press Win + K).";
+  EXTRA_WORDS.en.mr_and3 = "Choose the projector.";
+  EXTRA_WORDS.en.mr_start = "Start Android";
+  EXTRA_WORDS.en.mr_close = "Close";
+  EXTRA_WORDS.nl = EXTRA_WORDS.nl || {};
+  EXTRA_WORDS.nl.mr_title = "Scherm delen";
+  EXTRA_WORDS.nl.mr_sub = "Laat je telefoon, tablet of laptop zien op de projector.";
+  EXTRA_WORDS.nl.mr_ios = "iPhone, iPad of Mac";
+  EXTRA_WORDS.nl.mr_ios1 = "Zit op hetzelfde wifi-netwerk als de projector.";
+  EXTRA_WORDS.nl.mr_ios2 = "Open het bedieningspaneel en tik op Schermsynchronisatie.";
+  EXTRA_WORDS.nl.mr_ios3 = "Kies de projector. Het werkt meteen, vanaf elk scherm.";
+  EXTRA_WORDS.nl.mr_and = "Android of Windows";
+  EXTRA_WORDS.nl.mr_and1 = "Druk hieronder op Start Android.";
+  EXTRA_WORDS.nl.mr_and2 = "Open op de telefoon Casten, Smart View of Scherm spiegelen (Windows: Win + K).";
+  EXTRA_WORDS.nl.mr_and3 = "Kies de projector.";
+  EXTRA_WORDS.nl.mr_start = "Start Android";
+  EXTRA_WORDS.nl.mr_close = "Sluiten";
+  // the screen mirroring page (the same steps as the projector's SameScreen app)
+  [["en", {
+    mr_net: "Current network", mr_ip: "IP address", mr_name: "Device name", mr_state: "Active state", mr_active: "Activated",
+    mr_this: "this projector",
+    mr_k_wireless: "Android wireless", mr_k_miracast: "Miracast", mr_k_airplay: "AirPlay", mr_k_awired: "Android wired", mr_k_iwired: "Apple wired",
+    mr_dl_and: "Android 5.0 or later", mr_dl_ios: "iOS 10.0 or later", mr_dl_mac: "macOS 10.13 or later",
+    mr_pin: "Enter the PIN code or IP", mr_devlist: "Device list (1)",
+    mr_w1: "Connect your phone and the projector to the same network. Visit {url} and install the tranScreen app.",
+    mr_w2: "Open tranScreen and search for {name}. You can share your screen and use your phone as a remote.",
+    mr_cast: "Cast", mr_castscreen: "Cast screen", mr_cancel: "Cancel", mr_help: "Help",
+    mr_m1: "Connect your phone and the projector to the same network, then turn on Cast in your phone's quick settings.",
+    mr_m2: "Your phone looks for the projector: choose {name} to start sharing.",
+    mr_mi_t: "How popular phones start casting",
+    mr_mi_1: "Pull down the notification bar and tap Cast, Share or Screen Cast.",
+    mr_mi_a: "Samsung: notification bar, Smart View",
+    mr_mi_b: "Xiaomi: Settings, Connection & sharing, Cast",
+    mr_mi_c: "Huawei: Settings, More connections, Easy Projection",
+    mr_mi_d: "OPPO: Settings, Other wireless connections, Screencast",
+    mr_mi_e: "vivo: Settings, Other networks & connections, Screen mirroring",
+    mr_mi_f: "Google Pixel: notification bar, Screen cast",
+    mr_mi_note: "Menu names can differ per phone model and software version.",
+    mr_mi_2: "Your phone then searches for screens nearby: tap the projector to connect.",
+    mr_start2: "Start",
+    mr_sm: "Screen Mirroring", mr_airplay_to: "AirPlay to",
+    mr_a1: "Connect your iPhone and the projector to the same network. Open Control Centre and tap Screen Mirroring.",
+    mr_a2: "Choose {name}. Your screen is shown straight away.",
+    mr_a3: "Click the Screen Mirroring icon in the menu bar and choose {name}.",
+    mr_waiting: "Waiting to connect…", mr_allow_t: "Allow USBCast to record audio?", mr_allow: "While using the app", mr_once: "Only this time", mr_deny: "Don't allow",
+    mr_rec_t: "Start recording or casting with USBCast?", mr_rec_b: "USBCast will see everything on your screen while it is shared.", mr_startnow: "Start now",
+    mr_u1: "Scan the QR code, or download the app from {url2}.",
+    mr_u2: "Plug the cable into the projector's USB port and tap Allow on your phone.",
+    mr_u3: "Tap Start now and enjoy your screen on the projector.",
+    mr_trust_t: "Trust This Computer?", mr_trust_b: "Your settings and data will be accessible from this computer.", mr_trust: "Trust", mr_dont: "Don't Trust",
+    mr_pass_t: "Enter Passcode",
+    mr_i1: "Plug the cable into the projector's USB port and tap Trust on your iPhone.",
+    mr_i2: "If your iPhone has a passcode, enter it to confirm. Your screen is shown.",
+    mr_hint: "‹ ›  switch   ·   Back  close",
+    mr_hint_ok: "OK  start Miracast   ·   ‹ ›  switch   ·   Back  close"
+  }], ["nl", {
+    mr_net: "Huidig netwerk", mr_ip: "IP-adres", mr_name: "Apparaatnaam", mr_state: "Status", mr_active: "Actief",
+    mr_this: "deze projector",
+    mr_k_wireless: "Android draadloos", mr_k_miracast: "Miracast", mr_k_airplay: "AirPlay", mr_k_awired: "Android met kabel", mr_k_iwired: "Apple met kabel",
+    mr_dl_and: "Android 5.0 of nieuwer", mr_dl_ios: "iOS 10.0 of nieuwer", mr_dl_mac: "macOS 10.13 of nieuwer",
+    mr_pin: "Vul de pincode of het IP in", mr_devlist: "Apparaten (1)",
+    mr_w1: "Verbind je telefoon en de projector met hetzelfde netwerk. Ga naar {url} en installeer de tranScreen-app.",
+    mr_w2: "Open tranScreen en zoek {name}. Je deelt je scherm en gebruikt je telefoon als afstandsbediening.",
+    mr_cast: "Casten", mr_castscreen: "Scherm casten", mr_cancel: "Annuleren", mr_help: "Help",
+    mr_m1: "Verbind je telefoon en de projector met hetzelfde netwerk en zet Casten aan in de snelle instellingen.",
+    mr_m2: "Je telefoon zoekt de projector: kies {name} om te delen.",
+    mr_mi_t: "Zo start je casten op populaire telefoons",
+    mr_mi_1: "Veeg de meldingsbalk omlaag en tik op Casten, Delen of Scherm casten.",
+    mr_mi_a: "Samsung: meldingsbalk, Smart View",
+    mr_mi_b: "Xiaomi: Instellingen, Verbinding en delen, Casten",
+    mr_mi_c: "Huawei: Instellingen, Meer verbindingen, Eenvoudige projectie",
+    mr_mi_d: "OPPO: Instellingen, Andere draadloze verbindingen, Scherm casten",
+    mr_mi_e: "vivo: Instellingen, Andere netwerken en verbindingen, Scherm spiegelen",
+    mr_mi_f: "Google Pixel: meldingsbalk, Scherm casten",
+    mr_mi_note: "Menunamen kunnen per telefoon en softwareversie verschillen.",
+    mr_mi_2: "Je telefoon zoekt dan schermen in de buurt: tik op de projector om te verbinden.",
+    mr_start2: "Start",
+    mr_sm: "Schermsynchronisatie", mr_airplay_to: "AirPlay naar",
+    mr_a1: "Verbind je iPhone en de projector met hetzelfde netwerk. Open het bedieningspaneel en tik op Schermsynchronisatie.",
+    mr_a2: "Kies {name}. Je scherm verschijnt meteen.",
+    mr_a3: "Klik in de menubalk op het Schermsynchronisatie-icoon en kies {name}.",
+    mr_waiting: "Wachten op verbinding…", mr_allow_t: "USBCast toestaan audio op te nemen?", mr_allow: "Tijdens gebruik van de app", mr_once: "Alleen deze keer", mr_deny: "Niet toestaan",
+    mr_rec_t: "Opnemen of casten starten met USBCast?", mr_rec_b: "USBCast ziet alles op je scherm zolang je deelt.", mr_startnow: "Nu starten",
+    mr_u1: "Scan de QR-code, of download de app via {url2}.",
+    mr_u2: "Steek de kabel in de USB-poort van de projector en tik op Toestaan op je telefoon.",
+    mr_u3: "Tik op Nu starten en je scherm staat op de projector.",
+    mr_trust_t: "Vertrouw deze computer?", mr_trust_b: "Je instellingen en gegevens zijn toegankelijk vanaf deze computer.", mr_trust: "Vertrouw", mr_dont: "Niet vertrouwen",
+    mr_pass_t: "Voer toegangscode in",
+    mr_i1: "Steek de kabel in de USB-poort van de projector en tik op Vertrouw op je iPhone.",
+    mr_i2: "Heeft je iPhone een toegangscode, vul die dan in. Je scherm verschijnt.",
+    mr_hint: "‹ ›  wisselen   ·   Terug  sluiten",
+    mr_hint_ok: "OK  Miracast starten   ·   ‹ ›  wisselen   ·   Terug  sluiten"
+  }]].forEach(function (e) { EXTRA_WORDS[e[0]] = EXTRA_WORDS[e[0]] || {}; Object.keys(e[1]).forEach(function (k) { EXTRA_WORDS[e[0]][k] = e[1][k]; }); });
+  // the phone remote QR (pairs in one scan)
+  [["en", {
+    dr_remote: "Phone remote", rc_sub: "Every phone on the Wi-Fi can be a remote. It stays paired after the first time.",
+    rc_2: "Point your phone's camera at the code and tap the link.",
+    rc_3: "That's it: the remote opens, already connected. Tip: add it to your home screen.",
+    rc_alt: "No camera? Open {url} and type the code the projector shows."
+  }], ["nl", {
+    dr_remote: "Telefoon­bediening", rc_sub: "Elke telefoon op de wifi kan een afstandsbediening zijn. Na de eerste keer blijft hij verbonden.",
+    rc_2: "Richt de camera van je telefoon op de code en tik op de link.",
+    rc_3: "Klaar: de afstandsbediening opent meteen, al verbonden. Tip: zet hem op je beginscherm.",
+    rc_alt: "Geen camera? Open {url} en typ de code die de projector laat zien."
+  }]].forEach(function (e) { EXTRA_WORDS[e[0]] = EXTRA_WORDS[e[0]] || {}; Object.keys(e[1]).forEach(function (k) { EXTRA_WORDS[e[0]][k] = e[1][k]; }); });
   Object.keys(EXTRA_WORDS).forEach(function (l) { if (!S[l]) S[l] = {}; Object.keys(EXTRA_WORDS[l]).forEach(function (k) { S[l][k] = EXTRA_WORDS[l][k]; }); });
 
   function t(key, vars) {

@@ -97,6 +97,7 @@ class Server(private val ctx: Context, port: Int) : NanoWSD(port) {
             }
         }
         if (!authed(s)) return json(401, err("pair this phone first: open this page on your phone and type the code from the TV"))
+        Adb.warm()   // a phone is using the remote: have the key sender running before its first press
 
         val q = { k: String -> s.parameters[k]?.firstOrNull() }
         return when ("$m $path") {
@@ -369,7 +370,7 @@ class Server(private val ctx: Context, port: Int) : NanoWSD(port) {
      */
     private inner class Socket(h: IHTTPSession) : WebSocket(h) {
         private val fn: (String) -> Unit = { runCatching { send(JSONObject(it).put("event", "now").toString()) } }
-        override fun onOpen() { Now.listen(fn); runCatching { send(Now.payload().put("event", "now").toString()) } }
+        override fun onOpen() { Adb.warm(); Now.listen(fn); runCatching { send(Now.payload().put("event", "now").toString()) } }
         override fun onClose(code: NanoWSD.WebSocketFrame.CloseCode?, reason: String?, initiatedByRemote: Boolean) { Now.unlisten(fn) }
         override fun onPong(pong: NanoWSD.WebSocketFrame?) {}
         override fun onException(e: IOException?) { Now.unlisten(fn) }

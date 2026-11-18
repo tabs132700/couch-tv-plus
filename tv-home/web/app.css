@@ -314,7 +314,7 @@ html.still .tile.focus .face, html.still .tile.focus .face::after { animation: n
 .theme-night .qbtn.focus { background: #fff; color: #111; }
 
 /* Keep watching: three glass cards */
-.theme-night .shelf { top: 40rem; left: var(--safe-x); right: var(--safe-x); }
+.theme-night .shelf { top: 40rem; left: var(--shelf-left, var(--safe-x)); right: var(--safe-x); }
 .theme-night .shelf-head { height: 2.25rem; margin-bottom: 1rem; }
 .theme-night .shelf-head h2 { font-size: 1.5625rem; font-weight: 600; color: rgba(255, 255, 255, 0.78); }
 .theme-night .shelf-track { gap: 1.375rem; }
@@ -928,7 +928,9 @@ html.still .tile.focus .face, html.still .tile.focus .face::after { animation: n
 .theme-night .np-t b { margin-top: 0.375rem; font-size: 1.5625rem; line-height: 2rem; }
 .theme-night .np-t small { font-size: 1.25rem; line-height: 1.625rem; }
 .theme-night.gearing .np-slot, .theme-night.apping .np-slot { opacity: 0; }
-.no-flex-gap.theme-night .shelf-row > * + * { margin-left: 1.375rem; }
+/* no flex gap: the strip keeps its -1.5rem ring room, so the first card sits under the heading; the gap
+   is only added while the Now playing card is there (1.375rem - 1.5rem) */
+.no-flex-gap.theme-night .np-slot.on + .shelf-clip { margin-left: -0.125rem; }
 
 /* Dock, glow and drawer */
 .scrim { background-color: rgba(27, 46, 61, 0.18); }
@@ -1006,10 +1008,12 @@ html.drawer-on .scrim.scrim.scrim { background: rgba(12, 20, 28, 0.72); }
 .wx-sun svg { margin-right: 0.5rem; }
 html.drawer-on .scene .gclock, html.drawer-on .scene .date { visibility: hidden; }
 
-/* crisp logos lifted from each app's own TV banner */
-.theme-night .app .face.ban > img { width: 74%; height: 50%; object-fit: contain; }
-.theme-night .app.ban .face.ban > img[src*="disney"] { height: 66%; }
-.theme-night .app.ban .face.ban > img[src*="playstore"] { height: 46%; }
+/* the dock's logos are vector (brand/b-*.svg), so they are drawn sharp at whatever size the
+   card is (and when it grows under the focus). */
+.theme-night .app .face.ban > img { width: 80%; height: 48%; object-fit: contain; }
+.theme-night .app.ban .face.ban > img[src*="netflix"] { width: 76%; }
+.theme-night .app.ban .face.ban > img[src*="disney"] { height: 72%; }
+.theme-night .app.ban .face.ban > img[src*="playstore"] { width: 86%; }
 /* eight cards on one line */
 .theme-night .grid { grid-auto-rows: 6.75rem; column-gap: 1.25rem; }
 .theme-night .app { width: 12rem; height: 6.75rem; }
@@ -1077,8 +1081,179 @@ html:not(.glow-look) .ambient { display: none; }
 html:not(.glow-look) .theme-night .app.focus .face, html:not(.glow-look) .glass.theme-night .app.focus .face {
   box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.9), 0 1.25rem 2.5rem rgba(0, 0, 0, 0.45); }
 
+/* screen mirroring (in the setup overlay): the projector's SameScreen layout */
+.mr { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; align-items: center; --cb: 91, 135, 168; }
+.mr-bar { align-self: stretch; display: flex; align-items: center; justify-content: center; height: 7.5rem; padding: 0 5rem;
+  background: rgba(255, 255, 255, 0.07); box-shadow: inset 0 -0.0625rem 0 rgba(255, 255, 255, 0.12); position: relative; }
+.mr-cell { min-width: 17rem; padding: 0 2.4rem; text-align: center; }
+.mr-cell + .mr-cell { box-shadow: inset 0.0625rem 0 0 rgba(255, 255, 255, 0.14); }
+.mr-cell span { display: block; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
+.mr-cell b { display: block; margin-top: 0.35rem; font-size: 1.85rem; font-weight: 600; white-space: nowrap; }
+.mr-cell.ok b::before { content: ""; display: inline-block; width: 0.8rem; height: 0.8rem; margin: 0 0.7rem 0.15rem 0; border-radius: 50%;
+  background: #6fd39a; box-shadow: 0 0 0.8rem #6fd39a; vertical-align: middle; }
+.mr-main { flex: 1; display: flex; align-items: center; justify-content: center; }
+.mr-step { width: 46rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.mr-step + .mr-step { margin-left: 8rem; }
+.mr-art { height: 25rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.mr-num { width: 3.4rem; height: 3.4rem; margin-top: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 1.7rem; font-weight: 700; color: #fff; background: rgb(var(--cb)); box-shadow: 0 0 1.4rem rgba(var(--cb), 0.8); }
+.mr-step p { margin-top: 1.2rem; font-size: 1.75rem; line-height: 2.45rem; color: rgba(255, 255, 255, 0.82); max-width: 42rem; min-height: 4.9rem; }
+.mr-step p em { font-style: normal; font-weight: 650; color: #fff; }
+.mr svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* the columns: two wide, three, or two phones next to the help text (Miracast) */
+.mr-main .mr-step { width: 34rem; }
+.mr-main .mr-step + .mr-step { margin-left: 4rem; }
+.mr-main .mr-step.wide { width: 44rem; }
+.mr-main .mr-step.wide + .mr-step.wide { margin-left: 8rem; }
+.mr-main .mr-step.narrow { width: 24rem; }
+.mr-main .mr-step.narrow + .mr-step.narrow { margin-left: 2rem; }
+.mr-main .mr-step.mac { width: 40rem; }
+.mr-step p { font-size: 1.55rem; line-height: 2.2rem; }
+.mr-num.pill { width: auto; padding: 0 1.2rem; border-radius: 1.7rem; font-size: 1.4rem; letter-spacing: 0.06em; }
+.mr-cell.ok b { color: #fff; }
+/* the phone */
+.mp { position: relative; width: 13.5rem; height: 25rem; padding: 1.1rem 0.6rem 0.8rem; border-radius: 2.3rem; background: #0b1218;
+  box-shadow: inset 0 0 0 0.35rem #2a3a47, 0 1.5rem 3rem rgba(0, 0, 0, 0.4); }
+.mp-notch { position: absolute; z-index: 3; top: 1.35rem; left: 50%; width: 3.6rem; height: 0.7rem; margin-left: -1.8rem; border-radius: 0.35rem; background: #0b1218; }
+.mp-scr { position: relative; height: 100%; overflow: hidden; border-radius: 1.6rem; padding: 2rem 0.8rem 0.8rem; background: #141f28; color: #fff; text-align: left; }
+.mp.light .mp-scr { background: #f2f4f7; color: #1b2e3d; }
+.mp.dark .mp-scr { background: #0e161d; }
+.mp.ios .mp-scr { border-radius: 1.9rem; }
+.mp.wall .mp-scr, .mp-wall { background: linear-gradient(160deg, #5b87a8 0%, #2c4a63 55%, #13202b 100%); }
+.mp-wall { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+.mp-bar { margin: -0.4rem -0.8rem 0.8rem; padding: 0.4rem 0 0.7rem; text-align: center; font-size: 1rem; font-weight: 700; color: rgb(var(--cb)); }
+.mp-bar.blue { background: rgb(var(--cb)); color: #fff; margin-top: -2rem; padding-top: 2.1rem; }
+.mp-input { padding: 0.55rem 0.7rem; border-radius: 1rem; background: #fff; font-size: 0.75rem; color: #8494a3; box-shadow: 0 0 0 0.0625rem #dde3ea; }
+.mp-card { margin-top: 0.8rem; padding: 0.7rem; border-radius: 0.9rem; background: #fff; box-shadow: 0 0 0 0.0625rem #dde3ea; }
+.mp-card > b { display: block; font-size: 0.85rem; margin-bottom: 0.6rem; }
+.mp-item { display: flex; align-items: center; padding: 0.5rem; border-radius: 0.6rem; font-size: 0.85rem; font-weight: 650; }
+.mp-item i { flex: none; width: 1.3rem; height: 1.3rem; margin-right: 0.5rem; }
+.mp-item span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp-item small { display: block; font-size: 0.65rem; font-weight: 500; opacity: 0.6; }
+.mp-item.on { background: rgba(var(--cb), 0.16); box-shadow: inset 0 0 0 0.125rem rgb(var(--cb)); }
+.mp-item.on u { flex: none; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: rgb(var(--cb)); }
+.mp-sheet { position: absolute; left: 0.7rem; right: 0.7rem; top: 42%; padding: 0.8rem; border-radius: 1rem; background: #f5f5f7; color: #1b2e3d; }
+.mp-sheet > b { display: block; font-size: 0.9rem; margin-bottom: 0.6rem; }
+.mp-sheet.dark { top: 34%; background: rgba(40, 52, 62, 0.92); color: #fff; }
+.mp-btns { display: flex; margin-top: 0.7rem; }
+.mp-btns span { flex: 1; padding: 0.4rem 0.2rem; border-radius: 0.5rem; text-align: center; font-size: 0.7rem; font-weight: 650; background: rgba(127, 140, 152, 0.18); }
+.mp-btns span + span { margin-left: 0.4rem; }
+.mp-btns span.on { background: rgb(var(--cb)); color: #fff; }
+.mp-btns.low { position: absolute; left: 1.4rem; right: 1.4rem; bottom: 1.6rem; color: #1b2e3d; }
+.mp-btns.low span { background: #f5f5f7; }
+.mp-dlg { position: absolute; z-index: 2; left: 0.8rem; right: 0.8rem; top: 50%; transform: translateY(-50%); padding: 0.9rem; border-radius: 1rem;
+  background: #fff; color: #1b2e3d; text-align: center; box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.35); }
+.mp-dlg > b { display: block; font-size: 0.9rem; line-height: 1.2rem; }
+.mp-dlg p { margin-top: 0.4rem; font-size: 0.68rem; line-height: 0.95rem; color: #5d6d7b; }
+.mp-dlg .mp-btns { flex-direction: column; }
+.mp-dlg .mp-btns span + span { margin: 0.35rem 0 0; }
+.mp-wait { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #6b7c8a; }
+.mp-dim { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: repeating-linear-gradient(180deg, #17222b 0 1.6rem, #1d2a35 1.6rem 3.2rem); }
+.mp-qs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; padding: 0.4rem; }
+.mp-qs i { height: 2.4rem; border-radius: 50%; background: #dfe5eb; }
+.mp-qs i.on { background: rgb(var(--cb)); }
+.mp-mag { position: absolute; z-index: 2; left: 50%; bottom: 2.4rem; width: 7rem; height: 7rem; margin-left: -3.5rem; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; color: #1b2e3d;
+  box-shadow: 0 0 0 0.3rem rgb(var(--cb)), 0 0 2rem rgba(var(--cb), 0.8), 0 1rem 2rem rgba(0, 0, 0, 0.35); }
+.mp-mag i { width: 3rem; height: 3rem; color: rgb(var(--cb)); }
+.mp-mag b { margin-top: 0.2rem; font-size: 0.8rem; font-weight: 700; max-width: 6rem; text-align: center; line-height: 1rem; }
+.mp-cc { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 2.3rem; gap: 0.5rem; padding-top: 0.6rem; }
+.mp-cc i { border-radius: 0.8rem; background: rgba(255, 255, 255, 0.14); }
+.mp-cc i.w2 { grid-column: span 2; grid-row: span 2; }
+.mp-cc i.tall { grid-row: span 2; }
+.mp-blur { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: radial-gradient(circle at 30% 20%, #3e6a8c, #0e161d 70%); filter: blur(0.6rem); }
+.mp-apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; padding: 0.4rem; }
+.mp-apps i { height: 2.3rem; border-radius: 0.6rem; background: rgba(255, 255, 255, 0.25); }
+.mp-pass { text-align: center; padding-top: 1.2rem; }
+.mp-pass > b { font-size: 0.85rem; }
+.mp-dots { display: flex; justify-content: center; margin: 0.8rem 0 1.4rem; }
+.mp-dots i { width: 0.55rem; height: 0.55rem; margin: 0 0.25rem; border-radius: 50%; box-shadow: inset 0 0 0 0.1rem #1b2e3d; }
+.mp-keys { display: grid; grid-template-columns: repeat(3, 2.6rem); justify-content: center; gap: 0.6rem 1rem; }
+.mp-keys i, .mp-keys s { height: 2.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 1.1rem; }
+.mp-keys i { background: #dfe5eb; }
+/* step 1 of Android wireless: where to download the app */
+.mr-dl { width: 36rem; overflow: hidden; border-radius: 2rem; background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.18), 0 1.5rem 3rem rgba(0, 0, 0, 0.3); text-align: left; }
+.dl-url { padding: 1.5rem 2rem; background: #f5f5f7; color: #1b2e3d; font-size: 2.3rem; font-weight: 700; }
+.dl-row { display: flex; align-items: center; padding: 1.25rem 2rem; }
+.dl-row + .dl-row { box-shadow: inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1); }
+.dl-row > div { flex: 1; margin-left: 1.2rem; }
+.dl-row b { display: block; font-size: 1.5rem; font-weight: 650; }
+.dl-row span { display: block; font-size: 1.25rem; color: rgba(255, 255, 255, 0.6); }
+.dl-ic { width: 3.4rem; height: 3.4rem; padding: 0.5rem; border-radius: 0.9rem; background: rgba(var(--cb), 0.35); }
+.dl-get { width: 3rem; height: 3rem; padding: 0.5rem; border-radius: 0.8rem; background: #f5f5f7; color: rgb(var(--cb)); }
+.mr .dl-get svg { stroke-width: 2.4; }
+/* Miracast: the help text and the Start button */
+.mr-side { width: 50rem; margin-left: 4rem; align-self: stretch; position: relative; padding-top: 3rem; text-align: left; }
+.mr-side h3 { font-size: 2rem; font-weight: 650; margin-bottom: 1rem; }
+.mr-side ol { padding-left: 2rem; font-size: 1.4rem; line-height: 2rem; color: rgba(255, 255, 255, 0.85); }
+.mr-side ol > li + li { margin-top: 1rem; }
+.mr-side ul { list-style: none; margin: 0.4rem 0; padding: 0; }
+.mr-side ul li { font-size: 1.3rem; line-height: 1.9rem; color: rgba(255, 255, 255, 0.7); }
+.mr-side ul li::before { content: ""; display: inline-block; width: 0.5rem; height: 0.5rem; margin: 0 0.8rem 0.15rem 0; border-radius: 50%; background: rgb(var(--cb)); }
+.mr-side small { display: block; font-size: 1.15rem; line-height: 1.6rem; color: rgba(255, 255, 255, 0.5); }
+.mr-start { position: absolute; right: 0; bottom: 0; min-width: 14rem; padding: 1.1rem 3rem; border-radius: 3rem; text-align: center;
+  font-size: 1.9rem; font-weight: 700; background: #f5f5f7; color: #1b2e3d;
+  box-shadow: 0 0 0 0.25rem rgb(var(--cb)), 0 0 2.5rem rgba(var(--cb), 0.75); }
+/* AirPlay from a Mac */
+.ml { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 6rem; }
+.ml-lid { width: 30rem; height: 17rem; border-radius: 1rem 1rem 0 0; padding: 0.6rem; background: #0b1218; box-shadow: inset 0 0 0 0.35rem #2a3a47; }
+.ml-lid::before { content: ""; display: block; height: 100%; border-radius: 0.4rem; background: linear-gradient(160deg, #5b87a8 0%, #2c4a63 55%, #13202b 100%); }
+.ml-menu { position: absolute; top: 6.6rem; right: 6rem; display: flex; }
+.ml-menu i { width: 1rem; height: 0.7rem; margin-left: 0.5rem; border-radius: 0.15rem; background: rgba(255, 255, 255, 0.5); }
+.ml-menu i.on { background: #fff; box-shadow: 0 0 0.6rem #fff; }
+.ml-base { width: 36rem; height: 1.1rem; border-radius: 0 0 1.1rem 1.1rem; background: #2a3a47; }
+.ml-bubble { position: absolute; top: 0; right: 1.5rem; width: 13rem; padding: 0.9rem; border-radius: 1.2rem; text-align: center; background: #f5f5f7; color: #1b2e3d;
+  box-shadow: 0 0 0 0.25rem rgb(var(--cb)), 0 0 2rem rgba(var(--cb), 0.7); }
+.ml-bubble::after { content: ""; position: absolute; bottom: -0.7rem; right: 3.5rem; border: 0.7rem solid transparent; border-bottom: 0; border-top-color: #f5f5f7; }
+.ml-bubble i { display: block; width: 2.4rem; height: 2.4rem; margin: 0 auto; color: rgb(var(--cb)); }
+.ml-bubble b { display: block; font-size: 0.95rem; }
+.ml-bubble span { display: block; font-size: 1.05rem; font-weight: 700; color: rgb(var(--cb)); }
+/* Android wired: the QR code */
+.mr-qr { position: relative; width: 19rem; height: 19rem; padding: 1.2rem; border-radius: 2rem; background: #fff; box-shadow: 0 0 0 0.25rem rgb(var(--cb)), 0 1.5rem 3rem rgba(0, 0, 0, 0.35); }
+.mr-qr img, .qr-ph { display: block; width: 100%; height: 100%; }
+.qr-ph { background: repeating-conic-gradient(#1b2e3d 0 25%, #fff 0 50%) 0 0 / 1.4rem 1.4rem; }
+.mr-qr > i { position: absolute; left: 50%; top: 50%; width: 4.4rem; height: 4.4rem; margin: -2.2rem 0 0 -2.2rem; padding: 0.7rem; border-radius: 1rem;
+  background: rgb(var(--cb)); color: #fff; box-shadow: 0 0 0 0.35rem #fff; }
+/* the five ways along the bottom */
+.mr-tiles { display: flex; justify-content: center; margin-bottom: 1.2rem; }
+.mr-tile { width: 18.5rem; height: 9.5rem; border-radius: 1.6rem; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.85);
+  transition: transform 200ms var(--ease), background 200ms var(--ease); }
+.mr-tile + .mr-tile { margin-left: 2rem; }
+.mr-tile i { width: 3.8rem; height: 3.8rem; }
+.mr-tile b { margin-top: 0.7rem; font-size: 1.6rem; font-weight: 600; white-space: nowrap; }
+.mr-tile.focus { background: #f5f5f7; color: #1b2e3d; transform: scale(1.06);
+  box-shadow: 0 0 0 0.25rem rgb(var(--cb)), 0 0 2.5rem rgba(var(--cb), 0.75), 0 1.2rem 2.5rem rgba(0, 0, 0, 0.35); }
+.mr-tile.focus i { color: rgb(var(--cb)); }
+.mr-hint { margin-bottom: 2.2rem; font-size: 1.3rem; color: rgba(255, 255, 255, 0.55); white-space: pre; }
+
 /* ================= All apps: every app with its name, OK opens it ================= */
 html.expanded.theme-night .grid { row-gap: 3.4rem; padding-bottom: 3.6rem; }
 html.expanded.theme-night .app .label { display: block; top: calc(100% + 0.6rem); left: -0.5rem; right: -0.5rem; width: auto;
   font-size: 1.2rem; line-height: 1.6rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.85; }
 html.expanded.theme-night .app.focus .label { opacity: 1; }
+
+.mr-main { align-items: flex-start; padding-top: 3.2rem; }
+.mr-main .mr-side { align-self: auto; height: 33rem; padding-top: 0; }
+/* real screenshots in a phone body */
+.mp.real { width: 12rem; height: 25.6rem; padding: 0.45rem; border-radius: 2.2rem; background: #1a1d21;
+  box-shadow: inset 0 0 0 0.12rem #5c6670, inset 0 0 0 0.3rem #22262b, 0 1.6rem 3.2rem rgba(0, 0, 0, 0.45); }
+.mp.real .mp-scr { padding: 0; border-radius: 1.8rem; background: #000; }
+.mp.real .mp-scr img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.mp.real .mp-cam { position: absolute; z-index: 3; top: 1.05rem; left: 50%; width: 0.75rem; height: 0.75rem; margin-left: -0.375rem; border-radius: 50%;
+  background: #05070a; box-shadow: 0 0 0 0.12rem #1a1d21; }
+.mp.real.ios { border-radius: 2.5rem; }
+.mp.real.ios .mp-scr { border-radius: 2.1rem; }
+.mp.real.ios .mp-cam { width: 4rem; height: 1.15rem; margin-left: -2rem; border-radius: 0.6rem; top: 0.95rem; }
+.mp-ring { position: absolute; z-index: 2; width: 3.6rem; height: 3.6rem; margin: -1.8rem 0 0 -1.8rem; border-radius: 50%;
+  box-shadow: 0 0 0 0.25rem rgb(var(--cb)), 0 0 1.6rem 0.4rem rgba(var(--cb), 0.85); animation: mrPulse 1.6s ease-in-out infinite; }
+.mp-ring.row { width: 9.6rem; height: 2.8rem; margin: -1.4rem 0 0 -4.8rem; border-radius: 0.9rem; }
+@keyframes mrPulse { 50% { box-shadow: 0 0 0 0.25rem rgb(var(--cb)), 0 0 2.4rem 0.8rem rgba(var(--cb), 0.55); } }
+.mr-main .mr-step.narrow .mr-art { height: 25.6rem; }
+.mp-ring.row.ios { width: 7.2rem; height: 2.2rem; margin: -1.1rem 0 0 -3.6rem; border-radius: 1.1rem; }
+.mr-main.k-airplay .mr-step.narrow { width: 22rem; }
+.mr-main.k-airplay .mr-step.narrow + .mr-step.mac { margin-left: 3rem; }
+/* phone remote QR: the fallback address under the steps */
+.fts-steps .rc-alt { display: block; margin-top: 1.8rem; font-size: 1.45rem; line-height: 2rem; color: rgba(255, 255, 255, 0.6); }
+.fts-qr.qr-ph { background: repeating-conic-gradient(#1b2e3d 0 25%, #fff 0 50%) 0 0 / 1.4rem 1.4rem; }

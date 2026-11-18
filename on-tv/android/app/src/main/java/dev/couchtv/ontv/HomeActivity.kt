@@ -40,6 +40,7 @@ class HomeActivity : Activity() {
     private var ready = false
     private val banners = ConcurrentHashMap<String, ByteArray>()
     private val icons = ConcurrentHashMap<String, ByteArray>()
+    @Volatile private var castSsid: String? = null
     private val base get() = "http://127.0.0.1:${Store.port}"
 
     override fun onCreate(b: Bundle?) {
@@ -130,6 +131,14 @@ class HomeActivity : Activity() {
             return true
         }
         @JavascriptInterface fun openSettings(): Boolean = runCatching { Tv.openSettings() }.isSuccess
+        // Hold OK on an app, then Delete: opens the system's uninstall prompt for that app
+        @JavascriptInterface fun uninstall(pkg: String): Boolean {
+            if (pkg.isBlank() || pkg == packageName) return false
+            val i = Intent(Intent.ACTION_DELETE, android.net.Uri.parse("package:$pkg")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (i.resolveActivity(packageManager) == null) return false
+            main.post { runCatching { startActivity(i) } }
+            return true
+        }
         // the first-time setup shows the phone remote's address and a QR code for it
         @JavascriptInterface fun lanAddress(): String = App.lanAddress() ?: ""
         @JavascriptInterface fun qr(text: String, size: Int): String = runCatching {
@@ -155,6 +164,22 @@ class HomeActivity : Activity() {
             main.post { runCatching { startActivity(i) } }
             return true
         }
+        // the screen mirroring page shows the Wi-Fi network and the name phones see the projector under.
+        // The network name needs location access on Android 10+, so it is read over the app's own ADB link instead.
+        @JavascriptInterface fun castInfo(): String {
+            val cr = contentResolver
+            val name = listOf("prj_device_name", "miracast_name").firstNotNullOfOrNull { k ->
+                runCatching { android.provider.Settings.System.getString(cr, k) }.getOrNull()?.takeIf { it.isNotBlank() }
+            } ?: runCatching { android.provider.Settings.Global.getString(cr, "device_name") }.getOrNull() ?: android.os.Build.MODEL
+            val ssid = castSsid ?: runCatching {
+                if (!Adb.ensure()) null
+                else Regex("connected to \"([^\"]+)\"").find(Adb.shell("cmd wifi status", 3_000))?.groupValues?.get(1)
+            }.getOrNull()?.also { castSsid = it }
+            return JSONObject().put("name", name).put("ssid", ssid ?: "").put("ip", App.lanAddress() ?: "").toString()
+        }
+        // the phone remote's address with a pairing link in it, for a QR that pairs in one scan
+        @JavascriptInterface fun pairUrl(): String = "http://" + (App.lanAddress() ?: "127.0.0.1") + ":" + Store.port + "/?pair=" + Auth.pairLink()
+        // a weak TV (little memory, like most projectors): the page drops its moving and blurred extras
         @JavascriptInterface fun version(): String = BuildConfig.VERSION_NAME
         @JavascriptInterface fun keep(key: String, value: String) { getSharedPreferences("page", MODE_PRIVATE).edit().putString(key, value).apply() }
         @JavascriptInterface fun kept(key: String): String? = getSharedPreferences("page", MODE_PRIVATE).getString(key, null)

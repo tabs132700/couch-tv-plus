@@ -250,6 +250,7 @@ object Adb {
             if (Build.VERSION.SDK_INT >= 30) runCatching { shell("pm grant ${BuildConfig.APPLICATION_ID} android.permission.WRITE_SECURE_SETTINGS", 8000) }
             runCatching { shell("pm grant ${BuildConfig.APPLICATION_ID} " + if (Build.VERSION.SDK_INT >= 29) "android.permission.READ_TV_LISTINGS" else "com.android.providers.tv.permission.READ_EPG_DATA", 8000) }
             FireHome.poke()
+            warm()
         }
         return true
     }
@@ -376,12 +377,29 @@ object Adb {
         } catch (e: Exception) { injShell = null; false }
     }
 
-    private fun openInjector(): Pair<AdbStream, OutputStream> {
+    // starting the injector costs over a second on a projector (app_process boots a Java VM), and it
+    // used to start on the first key press, so that press felt stuck. Now it starts as soon as ADB is up, again
+    // whenever a phone talks to the TV, and again a moment after it ends, so a press only writes a line.
+    private val warming = java.util.concurrent.atomic.AtomicBoolean(false)
+    @Volatile private var injRestarts = 0L
+    fun warm() {
+        if (!connected || injShell != null || !warming.compareAndSet(false, true)) return
+        io.execute { try { if (connected && injShell == null) runCatching { openInjector() } } finally { warming.set(false) } }
+    }
+
+    @Synchronized private fun openInjector(): Pair<AdbStream, OutputStream> {
+        injShell?.let { return it }
         val apk = ctx.applicationInfo.sourceDir
         execLock.lock()
         val s = try { mgr.openStream("shell:CLASSPATH=$apk exec app_process /system/bin dev.couchtv.ontv.KeyInjector") } finally { execLock.unlock() }
         val out = s.openOutputStream()
-        io.execute { runCatching { s.openInputStream().use { val b = ByteArray(4096); while (it.read(b) >= 0) { } } }; if (injShell?.first === s) injShell = null }
+        io.execute {
+            runCatching { s.openInputStream().use { val b = ByteArray(4096); while (it.read(b) >= 0) { } } }
+            if (injShell?.first === s) injShell = null
+            // it ended (adbd restarted, the TV slept): start a new one, but not in a tight loop
+            val now = System.currentTimeMillis()
+            if (now - injRestarts > 5_000) { injRestarts = now; Thread.sleep(1_500); warm() }
+        }
         return (s to out).also { injShell = it }
     }
 

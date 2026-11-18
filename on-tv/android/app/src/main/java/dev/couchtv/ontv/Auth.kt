@@ -38,8 +38,23 @@ object Auth {
     fun offPin(fn: (String?) -> Unit) { synchronized(listeners) { listeners -= fn } }
     private fun notifyPin() { val p = currentPin(); synchronized(listeners) { listeners.toList() }.forEach { it(p) } }
 
+    // the QR on the TV pairs in one scan. It carries a long random link code (not the 6 digits),
+    // good for 10 minutes and for every phone that scans it then, so a family can all scan the same QR.
+    @Volatile private var link: String? = null
+    @Volatile private var linkUntil = 0L
+
+    /** The link code for the QR on screen now: the same one while it has over 2 minutes left, else a new one. */
+    @Synchronized fun pairLink(): String {
+        val now = System.currentTimeMillis()
+        link?.let { if (now < linkUntil - 2 * 60_000) return it }
+        return hex(10).also { link = it; linkUntil = now + 10 * 60_000 }
+    }
+
     /** Returns a new token for the right code, null for a wrong one. */
     @Synchronized fun pair(code: String?, name: String?): String? {
+        val l = link
+        if (l != null && System.currentTimeMillis() < linkUntil && code != null && code.length == l.length &&
+            MessageDigest.isEqual(code.lowercase().toByteArray(), l.toByteArray())) return issue(name)
         val live = currentPin() ?: return null
         val given = code?.filter { it.isDigit() }.orEmpty()
         if (!MessageDigest.isEqual(given.toByteArray(), live.toByteArray())) {
@@ -49,6 +64,10 @@ object Auth {
         }
         pin = null
         notifyPin()
+        return issue(name)
+    }
+
+    private fun issue(name: String?): String {
         val token = hex(32)
         val list = tokens()
         list.put(JSONObject().put("hash", sha(token)).put("name", (name ?: "Phone").take(40)).put("at", System.currentTimeMillis()))

@@ -12,6 +12,7 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -27,6 +28,9 @@ class SetupActivity : Activity() {
     private lateinit var code: TextView
     private lateinit var adb: TextView
     private lateinit var homeBtn: Button
+    private lateinit var qr: ImageView
+    private lateinit var qrNote: TextView
+    private var qrFor: String? = null
     private val tick = object : Runnable { override fun run() { refresh(); main.postDelayed(this, 1500) } }
     private val pinListener: (String?) -> Unit = { main.post { refresh() } }
 
@@ -40,10 +44,21 @@ class SetupActivity : Activity() {
             text = t; textSize = size; setTextColor(colour); if (bold) typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
             setPadding(0, px(4), 0, px(4))
         }
-        col.addView(text("Couch TV", 34f, CREAM, true))
-        col.addView(text("The phone remote runs on this TV. No computer needed.", 16f, CREAM_2))
-        address = text("", 22f, AMBER, true); col.addView(address)
-        code = text("", 44f, CREAM, true); col.addView(code)
+        // the texts on the left, a QR on the right that opens the phone remote already paired (one scan)
+        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        val left = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        left.addView(text("Couch TV", 34f, CREAM, true))
+        left.addView(text(t("The phone remote runs on this TV. No computer needed.", "De telefoonbediening draait op deze tv. Geen computer nodig."), 16f, CREAM_2))
+        address = text("", 22f, AMBER, true); left.addView(address)
+        code = text("", 44f, CREAM, true); left.addView(code)
+        top.addView(left, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        val right = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
+        qr = ImageView(this).apply { setBackgroundColor(Color.WHITE); setPadding(px(8), px(8), px(8), px(8)) }
+        right.addView(qr, LinearLayout.LayoutParams(px(190), px(190)))
+        qrNote = text(t("Scan to use your phone\nas the remote", "Scan om je telefoon als\nafstandsbediening te gebruiken"), 15f, CREAM, true).apply { gravity = Gravity.CENTER }
+        right.addView(qrNote)
+        top.addView(right, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { leftMargin = px(24) })
+        col.addView(top)
         adb = text("", 16f, CREAM_2); col.addView(adb)
 
         val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, px(16), 0, 0) }
@@ -54,19 +69,23 @@ class SetupActivity : Activity() {
             setOnClickListener { on() }
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { rightMargin = px(12) }
         }
-        val connect = button("Connect ADB") { adb.text = "Connecting. If the TV asks \"Allow debugging?\", tick Always allow and press OK."; Thread { Adb.ensure(interactive = true); main.post { refresh() } }.start() }
+        val connect = button(t("Connect ADB", "ADB verbinden")) { adb.text = t("Connecting. If the TV asks \"Allow debugging?\", tick Always allow and press OK.", "Verbinden. Vraagt de tv \"Foutopsporing toestaan?\", vink Altijd toestaan aan en druk op OK."); Thread { Adb.ensure(interactive = true); main.post { refresh() } }.start() }
         row.addView(connect)
-        row.addView(button("New phone code") { Auth.newPin(); refresh() })
-        row.addView(button("Developer options") { runCatching { startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)) } })
+        row.addView(button(t("New phone code", "Nieuwe telefooncode")) { Auth.newPin(); refresh() })
+        row.addView(button(t("Developer options", "Opties voor ontwikkelaars")) { runCatching { startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)) } })
         homeBtn = button("") { App.setHomeEnabled(this, !App.homeEnabled(this)); FireHome.poke(); refresh() }
         row.addView(homeBtn)
-        row.addView(button("Forget phones") { Auth.forgetAll(); refresh() })
+        row.addView(button(t("Forget phones", "Telefoons vergeten")) { Auth.forgetAll(); refresh() })
         col.addView(row)
-        col.addView(text((if (android.os.Build.VERSION.SDK_INT >= 33) "This TV runs Android 13 or newer, so use wireless debugging pairing (Connect ADB may never get an answer). " else "") +
+        if (nl) col.addView(text((if (android.os.Build.VERSION.SDK_INT >= 33) "Deze tv draait Android 13 of nieuwer, dus koppel via draadloze foutopsporing (ADB verbinden krijgt misschien nooit antwoord). " else "") +
+            "Draadloze foutopsporing (Android 11 en nieuwer, tv op wifi): Opties voor ontwikkelaars > Draadloze foutopsporing > aan, sta dit netwerk toe, dan " +
+            "Apparaat koppelen met koppelingscode, en typ die code op je telefoon op de instellingenpagina zolang de code op het scherm staat. " +
+            "Let op: USB-foutopsporingsautorisaties intrekken staat vlak naast Draadloze foutopsporing; druk daar nooit op OK.", 14f, CREAM_2).apply { setPadding(0, px(18), 0, 0) })
+        else col.addView(text((if (android.os.Build.VERSION.SDK_INT >= 33) "This TV runs Android 13 or newer, so use wireless debugging pairing (Connect ADB may never get an answer). " else "") +
             "Wireless debugging (Android 11 and newer, TV on Wi-Fi): Developer options > Wireless debugging > on, allow this network, then " +
             "Pair device with pairing code, and type that code on your phone at the setup page while the code stays on screen. " +
             "Careful: Revoke USB debugging authorizations sits right next to Wireless debugging; never press OK on it.", 14f, CREAM_2).apply { setPadding(0, px(18), 0, 0) })
-        col.addView(text("Turning the TV on is not possible from the TV itself: once it sleeps, this app sleeps too. Use the TV's own remote.", 14f, CREAM_2))
+        col.addView(text(t("Turning the TV on is not possible from the TV itself: once it sleeps, this app sleeps too. Use the TV's own remote.", "De tv aanzetten kan niet vanaf de tv zelf: slaapt hij, dan slaapt deze app ook. Gebruik de eigen afstandsbediening van de tv."), 14f, CREAM_2))
         setContentView(ScrollView(this).apply { setBackgroundColor(GROUND); addView(col) })
         connect.requestFocus()
         if (Auth.currentPin() == null) Auth.newPin()
@@ -76,21 +95,42 @@ class SetupActivity : Activity() {
     override fun onPause() { super.onPause(); Auth.offPin(pinListener); main.removeCallbacks(tick) }
     override fun onNewIntent(i: Intent) { super.onNewIntent(i); refresh() }
 
+    // Dutch when the TV home's language (Home settings) is Dutch, or, with none picked there, the TV's own
+    private val nl: Boolean by lazy {
+        val picked = runCatching { (Store.readJson("home-settings.json") as? org.json.JSONObject)?.optString("lang") }.getOrNull().orEmpty()
+        picked.ifEmpty { java.util.Locale.getDefault().language }.lowercase().startsWith("nl")
+    }
+    private fun t(en: String, nlText: String) = if (nl) nlText else en
+
     private fun refresh() {
         val ip = App.lanAddress()
-        address.text = if (ip != null) "On your phone open  http://$ip:${Store.port}\nSetup page  http://$ip:${Store.port}/setup" else "Not on a network yet"
+        address.text = if (ip != null) t("On your phone open", "Open op je telefoon") + "  http://$ip:${Store.port}\n" + t("Setup page", "Instellingenpagina") + "  http://$ip:${Store.port}/setup" else t("Not on a network yet", "Nog niet verbonden met een netwerk")
         val p = Auth.currentPin()
-        code.text = if (p != null) "Phone code  ${p.take(3)} ${p.drop(3)}" else "Phone code: press New phone code"
+        code.text = if (p != null) t("Phone code", "Telefooncode") + "  ${p.take(3)} ${p.drop(3)}" else t("Phone code: press New phone code", "Telefooncode: druk op Nieuwe telefooncode")
         code.visibility = View.VISIBLE
+        val link = if (ip != null) "http://$ip:${Store.port}/?pair=" + Auth.pairLink() else null
+        if (link != qrFor) {
+            qrFor = link
+            qr.setImageBitmap(link?.let { qrBitmap(it, 360) })
+            qr.visibility = if (link != null) View.VISIBLE else View.GONE
+            qrNote.visibility = qr.visibility
+        }
         val s = Adb.status()
         adb.text = "ADB: " + when {
-            Adb.connected -> "connected (${Adb.route}). Keys, typing and \"what's playing\" work."
-            s["state"] == "waiting_for_allow" || s["state"] == "connecting" -> "waiting. Accept \"Allow debugging?\" on the TV."
-            s["state"] == "needs_pairing" -> "not set up. Pair wireless debugging from the phone setup page."
-            else -> "off. Opening apps and volume still work; keys need ADB." + (Adb.lastError?.let { "\n($it)" } ?: "")
-        } + "   Phones paired: ${Auth.phoneCount()}"
-        homeBtn.text = if (App.homeEnabled(this)) "Stop being the home screen" else "Use as home screen"
+            Adb.connected -> t("connected (${Adb.route}). Keys, typing and \"what's playing\" work.", "verbonden (${Adb.route}). Toetsen, typen en \"wat speelt er\" werken.")
+            s["state"] == "waiting_for_allow" || s["state"] == "connecting" -> t("waiting. Accept \"Allow debugging?\" on the TV.", "wachten. Accepteer \"Foutopsporing toestaan?\" op de tv.")
+            s["state"] == "needs_pairing" -> t("not set up. Pair wireless debugging from the phone setup page.", "niet ingesteld. Koppel draadloze foutopsporing via de instellingenpagina op je telefoon.")
+            else -> t("off. Opening apps and volume still work; keys need ADB.", "uit. Apps openen en volume werken nog; toetsen hebben ADB nodig.") + (Adb.lastError?.let { "\n($it)" } ?: "")
+        } + t("   Phones paired: ", "   Gekoppelde telefoons: ") + Auth.phoneCount()
+        homeBtn.text = if (App.homeEnabled(this)) t("Stop being the home screen", "Niet meer als startscherm") else t("Use as home screen", "Als startscherm gebruiken")
     }
+
+    private fun qrBitmap(text: String, size: Int): android.graphics.Bitmap? = runCatching {
+        val m = com.google.zxing.qrcode.QRCodeWriter().encode(text, com.google.zxing.BarcodeFormat.QR_CODE, size, size,
+            mapOf(com.google.zxing.EncodeHintType.MARGIN to 1))
+        val px = IntArray(size * size) { i -> if (m.get(i % size, i / size)) Color.BLACK else Color.WHITE }
+        android.graphics.Bitmap.createBitmap(px, size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    }.getOrNull()
 
     companion object {
         private val GROUND = Color.parseColor("#0D1E19")

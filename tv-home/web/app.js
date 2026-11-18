@@ -108,6 +108,8 @@
   var HOLD_MS = 600;    // how long OK is held to pick something up
 
   var ICONS = {
+    back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     screen: '<svg viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="13" rx="2"/><path d="M9 20.5h6M12 16.5v4"/></svg>',
     moon: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
     picture: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" class="fill"/></svg>',
@@ -1260,7 +1262,10 @@
     if (el) {
       var b = el.getBoundingClientRect(), w = pop.offsetWidth;
       pop.style.left = Math.max(5 * rem, Math.min(innerWidth - w - 5 * rem, b.left + b.width / 2 - w / 2)) + "px";
-      pop.style.top = Math.max(3.75 * rem, b.top - pop.offsetHeight - 2.25 * rem) + "px";
+      // sit above the hint pill too, so "Up and down to choose…" never runs under the last item
+      var above = b.top, hn = $("hint");
+      if (hn && hn.classList.contains("on")) { var hb = hn.getBoundingClientRect(); if (hb.height) above = Math.min(above, hb.top); }
+      pop.style.top = Math.max(3.75 * rem, above - pop.offsetHeight - 1.5 * rem) + "px";
     }
   }
   function closeAppMenu() {
@@ -1384,11 +1389,32 @@
 
   // the dock: each app's logo on a dark card, glowing in its own colour
   var BANNERS = {
-    "com.netflix.ninja": ["brand/b-netflix.png", "229,9,20"],
-    "com.google.android.youtube.tv": ["brand/b-youtube.png", "255,0,51"],
-    "com.disney.disneyplus": ["brand/b-disney.png", "40,90,230"],
-    "com.android.vending": ["brand/b-playstore.png", "1,135,95"]
+    "com.netflix.ninja": ["brand/b-netflix.svg", "229,9,20"],
+    "com.google.android.youtube.tv": ["brand/b-youtube.svg", "255,0,51"],
+    "com.disney.disneyplus": ["brand/b-disney.svg", "40,90,230"],
+    "com.android.vending": ["brand/b-playstore.svg", "1,135,95"]
   };
+  // The dock is at most DOCK_COLS wide. With more apps, its last slot is an arrow: it shows the next
+  // page of DOCK_COLS - 1 apps, and wraps to the first page after the last one.
+  var DOCK_COLS = 7, dockPageNo = 0;
+  // Arrows only when there is a page that way: Left from page 2 on, Right while more apps follow.
+  function dockPage(list) {
+    var pages = [], i = 0;
+    for (;;) {
+      var room = DOCK_COLS - (pages.length > 0 ? 1 : 0);
+      if (list.length - i <= room) { pages.push({ from: i, to: list.length, next: false }); break; }
+      pages.push({ from: i, to: i + room - 1, next: true });
+      i += room - 1;
+    }
+    dockPageNo = Math.max(0, Math.min(dockPageNo, pages.length - 1));
+    var pg = pages[dockPageNo], out = [];
+    if (dockPageNo > 0) out.push({ kind: "prev", name: "" });
+    out = out.concat(list.slice(pg.from, pg.to));
+    if (pg.next) out.push({ kind: "next", name: "" });
+    return out;
+  }
+  // the first app of the page in front (after the Left arrow, if there is one)
+  function dockFirst() { return gridItems[0] && gridItems[0].kind === "prev" ? 1 : 0; }
   var GLOW_RGB = "110,130,160";
   var NETFLIX_PKG = "com.netflix.ninja";
   function ambient(el) {
@@ -1396,9 +1422,11 @@
     document.documentElement.style.setProperty("--amb", rgb);
   }
   function dockHTML(it) {
+    if (it.kind === "next") return '<div class="tile app dock-ic"><div class="face tool">' + ICONS.chevron + '</div><div class="label"></div></div>';
+    if (it.kind === "prev") return '<div class="tile app dock-ic"><div class="face tool">' + ICONS.back + '</div><div class="label"></div></div>';
     var face, ban = it.package && BANNERS[it.package];
     if (ban) {
-      return '<div class="tile app dock-ic ban" data-glow="' + ban[1] + '" style="--glow:' + ban[1] + '"><div class="face ban"><img src="' + ban[0] + '" alt=""></div>' +
+      return '<div class="tile app dock-ic ban" data-glow="' + ban[1] + '" style="--glow:' + ban[1] + '"><div class="face ban' + (ban[2] ? " cono" : "") + '"><img src="' + ban[0] + '" alt="">' + (ban[2] ? '<span class="ban-sub">' + esc(ban[2]) + "</span>" : "") + "</div>" +
         dotHTML(it) + '<div class="label">' + esc(it.name) + "</div></div>";
     }
     if (it.kind === "screen") face = '<div class="face tool">' + ICONS.screen + "</div>";
@@ -1435,11 +1463,15 @@
     document.documentElement.classList.toggle("expanded", expanded);
     document.documentElement.classList.toggle("lifting", !!lift);
     gridItems = gridList();
+    if (NIGHT && !expanded && gridItems.length > DOCK_COLS) gridItems = dockPage(gridItems);
     if (NIGHT) {
       // the dock is as wide as what is in it; More apps uses all twelve columns
       // wide cards, so at most seven to a row
-      GRID_COLS = expanded ? 8 : Math.max(1, Math.min(8, gridItems.length));
+      GRID_COLS = expanded ? 8 : Math.max(1, Math.min(DOCK_COLS, gridItems.length));
       $("grid").style.gridTemplateColumns = "repeat(" + GRID_COLS + ", 12rem)";
+      // Keep watching starts on the dock's left edge (the dock is centred, so its width decides the edge)
+      var dock = document.querySelector(".apps");
+      if (dock && !expanded) document.documentElement.style.setProperty("--shelf-left", Math.round(dock.getBoundingClientRect().left) + "px");
     }
     $("grid").innerHTML = gridItems.map(appHTML).join("");
     gridEls = Array.prototype.slice.call($("grid").children);
@@ -1516,7 +1548,149 @@
     zone = "grid"; g = 0;
     paintFocus();
   }
+  // Screen mirroring: the same page as the projector's own SameScreen app (info bar, the steps with pictures,
+  // five ways to share along the bottom). Left/right switches the way; on Miracast
+  // OK opens the projector's Miracast receiver (Android phones and Windows need it open; the others work any time).
+  var MR = { pick: 0, info: null, qr: "" };
+  var MR_KINDS = ["wireless", "miracast", "airplay", "awired", "iwired"];
+  var MR_ICON = {
+    wireless: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="14" height="14" rx="2.5"/><path d="M8 9.2v5.6l4.6-2.8z" fill="currentColor"/><path d="M16.5 10.5l5-3v9l-5-3"/></svg>',
+    miracast: '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="13" height="10" rx="1.4"/><path d="M13 16.5h5"/><rect x="2.5" y="8" width="7.5" height="13" rx="1.5"/><path d="M5.3 18.3h2"/></svg>',
+    airplay: '<svg viewBox="0 0 24 24"><rect x="2.5" y="3" width="15" height="11" rx="1.6"/><rect x="6.5" y="8" width="15" height="11" rx="1.6" fill="none"/></svg>',
+    awired: '<svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="14.5" rx="2"/><path d="M10 13.6h4"/><path d="M12 16.5v2"/><rect x="10" y="18.5" width="4" height="3.5" rx="0.8"/><path d="M11.2 20.3h1.6"/></svg>',
+    iwired: '<svg viewBox="0 0 24 24"><rect x="6.5" y="2" width="11" height="17" rx="2.4"/><path d="M10.5 4.4h3"/><path d="M12 19v3"/></svg>',
+    screen: '<svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="1.6"/><path d="M8 20.5h8"/></svg>',
+    down: '<svg viewBox="0 0 24 24"><path d="M12 4v12M6.5 11l5.5 5.5 5.5-5.5M5 20h14"/></svg>',
+    mirror: '<svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="13" height="10" rx="1.4"/><rect x="8.5" y="10" width="13" height="10" rx="1.4"/></svg>'
+  };
+  function mirrorInfo() {
+    if (!MR.info) {
+      var ip = ""; try { ip = (TV && TV.lanAddress && TV.lanAddress()) || location.hostname; } catch (e) { ip = location.hostname; }
+      MR.info = { name: "", ssid: "", ip: ip };
+    }
+    return MR.info;
+  }
+  function mirrorOpen() {
+    FTS.back = zone === "drawer" ? "grid" : zone; FTS.step = "mirror"; FTS.btn = MR.pick;
+    zone = "setup"; FTS.on = true;
+    document.documentElement.classList.add("fts-on");
+    clearFocus();
+    mirrorInfo();
+    ftsRender();
+    // the network name comes over the projector's own ADB link: fetch it after the first paint, then draw again
+    if (TV && TV.castInfo && !MR.info.ssid) setTimeout(function () {
+      try { var j = JSON.parse(TV.castInfo()); MR.info = { name: j.name || "", ssid: j.ssid || "", ip: j.ip || MR.info.ip }; } catch (e) {}
+      if (FTS.on && FTS.step === "mirror") mirrorRender();
+    }, 60);
+  }
+  function mirrorClose(android) {
+    FTS.on = false; FTS.step = 0;
+    document.documentElement.classList.remove("fts-on");
+    $("fts").innerHTML = "";
+    zone = "grid"; g = 0;
+    paintFocus();
+    if (android) startComp("com.softwinner.miracastReceiver", "com.softwinner.miracastReceiver.Miracast");
+  }
+  // the pictures: a phone, an iPhone, a laptop, each with a made-up screen
+  function mrPhone(screen, cls) { return '<div class="mp' + (cls ? " " + cls : "") + '"><i class="mp-notch"></i><div class="mp-scr">' + screen + "</div></div>"; }
+  // a real screenshot (brand/mirror/) in a phone body: Android with a punch-hole camera, iPhone with the island
+  function mrShot(img, extra, ios) {
+    return '<div class="mp real' + (ios ? " ios" : "") + '"><i class="mp-cam"></i><div class="mp-scr"><img src="brand/mirror/' + img + '" alt="">' + (extra || "") + "</div></div>";
+  }
+  function mrMag(icon, label) { return '<div class="mp-mag"><i>' + icon + "</i>" + (label ? "<b>" + esc(label) + "</b>" : "") + "</div>"; }
+  function mrDialog(title, body, btns) {
+    return '<div class="mp-dlg"><b>' + esc(title) + "</b>" + (body ? "<p>" + esc(body) + "</p>" : "") +
+      (btns ? '<div class="mp-btns">' + btns.map(function (x, i) { return "<span" + (i === btns.length - 1 ? ' class="on"' : "") + ">" + esc(x) + "</span>"; }).join("") + "</div>" : "") + "</div>";
+  }
+  function mrStep(num, art, text, cls) {
+    return '<div class="mr-step' + (cls ? " " + cls : "") + '"><div class="mr-art">' + art + '</div><div class="mr-num' + (typeof num === "string" ? " pill" : "") + '">' + num + "</div><p>" + text + "</p></div>";
+  }
+  function mirrorRender() {
+    var info = mirrorInfo(), p = FTS.btn, kind = MR_KINDS[p];
+    var name = info.name || t("mr_this"), ip = info.ip || "-";
+    var em = function (s) { return "<em>" + esc(s) + "</em>"; };
+    var say = function (key) { return esc(t(key)).replace("{name}", em(name)).replace("{url}", em("transcreen.app")).replace("{url2}", em("transcreen.app/linedisplay")); };
+    var cell = function (label, value) { return '<div class="mr-cell"><span>' + esc(label) + "</span><b>" + esc(value) + "</b></div>"; };
+    var bar = '<div class="mr-bar">' +
+      cell(t("mr_net"), info.ssid ? "“" + info.ssid + "”" : "-") + cell(t("mr_ip"), ip) +
+      cell(t("mr_name"), name) + '<div class="mr-cell ok"><span>' + esc(t("mr_state")) + "</span><b>" + esc(t("mr_active")) + "</b></div></div>";
+    var list = function (title, dark) {
+      return '<div class="mp-sheet' + (dark ? " dark" : "") + '"><b>' + esc(title) + '</b><div class="mp-item on"><i>' + MR_ICON.screen + "</i><span>" + esc(name) + "</span><u></u></div></div>";
+    };
+    var cols = "", side = "";
+    if (kind === "wireless") {
+      var row = function (ic, title, sub) { return '<div class="dl-row"><i class="dl-ic">' + ic + "</i><div><b>" + esc(title) + "</b><span>" + esc(sub) + '</span></div><i class="dl-get">' + MR_ICON.down + "</i></div>"; };
+      var card = '<div class="mr-dl"><div class="dl-url">https://transcreen.app</div>' +
+        row(MR_ICON.awired, "tranScreen for Android", t("mr_dl_and")) + row(MR_ICON.iwired, "tranScreen for iOS", t("mr_dl_ios")) +
+        row(MR_ICON.screen, "tranScreen for Mac", t("mr_dl_mac")) + "</div>";
+      var app = '<div class="mp-bar">tranScreen</div><div class="mp-input">' + esc(t("mr_pin")) + '</div><div class="mp-card"><b>' + esc(t("mr_devlist")) +
+        '</b><div class="mp-item on"><i>' + MR_ICON.screen + "</i><span>" + esc(name) + "<small>" + esc(ip) + "</small></span><u></u></div></div>";
+      cols = mrStep(1, card, say("mr_w1"), "wide") + mrStep(2, mrPhone(app, "light"), say("mr_w2"), "wide");
+    } else if (kind === "miracast") {
+      // real Android screens (taken on a phone emulator): the Cast tile in quick settings, then the Cast list
+      cols = mrStep(1, mrShot("android-cast-tile.jpg", '<i class="mp-ring" style="left:61.8%;top:30%"></i>'), say("mr_m1"), "narrow") +
+        mrStep(2, mrShot("android-cast-list.jpg", '<i class="mp-ring row" style="left:50%;top:51%"></i>'), say("mr_m2"), "narrow");
+      var lines = ["mr_mi_a", "mr_mi_b", "mr_mi_c", "mr_mi_d", "mr_mi_e", "mr_mi_f"].map(function (k) { return "<li>" + esc(t(k)) + "</li>"; }).join("");
+      side = '<div class="mr-side"><h3>' + esc(t("mr_mi_t")) + '</h3><ol><li>' + esc(t("mr_mi_1")) + "<ul>" + lines + '</ul><small>' + esc(t("mr_mi_note")) +
+        "</small></li><li>" + esc(t("mr_mi_2")) + '</li></ol><div class="mr-start">' + esc(t("mr_start2")) + "</div></div>";
+    } else if (kind === "airplay") {
+      var mac = '<div class="ml"><div class="ml-lid"><div class="ml-menu"><i></i><i class="on"></i></div></div><div class="ml-base"></div>' +
+        '<div class="ml-bubble"><i>' + MR_ICON.mirror + "</i><b>" + esc(t("mr_airplay_to")) + "</b><span>" + esc(name) + "</span></div></div>";
+      // real iPhone screens: Control Centre with the Screen Mirroring button, then the list with the projector in it
+      cols = mrStep(1, mrShot("ios-cc.jpg", '<i class="mp-ring" style="left:39.6%;top:59.3%"></i>', true), say("mr_a1"), "narrow") +
+        mrStep(2, mrShot("ios-mirror-list.jpg", '<i class="mp-ring row ios" style="left:57.5%;top:60.8%"></i>', true), say("mr_a2"), "narrow") +
+        mrStep("MAC", mac, say("mr_a3"), "mac");
+    } else if (kind === "awired") {
+      if (!MR.qr) { try { MR.qr = TV && TV.qr ? TV.qr("https://transcreen.app/linedisplay", 300) : ""; } catch (e) {} }
+      var qr = '<div class="mr-qr">' + (MR.qr ? '<img src="' + MR.qr + '" alt="">' : '<div class="qr-ph"></div>') + '<i>' + MR_ICON.mirror + "</i></div>";
+      var wait = '<div class="mp-bar blue">USBCast</div><div class="mp-wait">' + esc(t("mr_waiting")) + "</div>" +
+        mrDialog(t("mr_allow_t"), "", [t("mr_deny"), t("mr_once"), t("mr_allow")]);
+      var start = '<div class="mp-dim"></div>' + mrDialog(t("mr_rec_t"), t("mr_rec_b"), [t("mr_cancel"), t("mr_startnow")]);
+      cols = mrStep(1, qr, say("mr_u1")) + mrStep(2, mrPhone(wait, "light"), say("mr_u2")) + mrStep(3, mrPhone(start, "dark"), say("mr_u3"));
+    } else {
+      var home = '<div class="mp-apps">' + new Array(13).join("<i></i>") + "</div>" + mrDialog(t("mr_trust_t"), t("mr_trust_b"), [t("mr_dont"), t("mr_trust")]);
+      var keys = ""; ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", ""].forEach(function (k) { keys += k ? "<i>" + k + "</i>" : "<s></s>"; });
+      var pass = '<div class="mp-pass"><b>' + esc(t("mr_pass_t")) + '</b><div class="mp-dots"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="mp-keys">' + keys + "</div></div>";
+      cols = mrStep(1, mrPhone(home, "ios wall"), say("mr_i1"), "wide") + mrStep(2, mrPhone(pass, "ios light"), say("mr_i2"), "wide");
+    }
+    var tiles = MR_KINDS.map(function (k, i) {
+      return '<div class="mr-tile' + (i === p ? " focus" : "") + '"><i>' + MR_ICON[k] + "</i><b>" + esc(t("mr_k_" + k)) + "</b></div>";
+    }).join("");
+    $("fts").innerHTML = '<div class="mr">' + bar + '<div class="mr-main k-' + kind + '">' + cols + side + "</div>" +
+      '<div class="mr-tiles">' + tiles + '</div><div class="mr-hint">' + esc(t(kind === "miracast" ? "mr_hint_ok" : "mr_hint")) + "</div></div>";
+  }
+  // the phone remote QR. It holds a pairing link, so scanning it opens the remote already paired:
+  // no 6 digit code to type. The plain address stays as a fallback for phones without a camera.
+  function phoneBlock() {
+    var ip = "", qr = "", link = "";
+    try { ip = (TV && TV.lanAddress && TV.lanAddress()) || location.hostname; } catch (e) { ip = location.hostname; }
+    var url = "http://" + ip + ":5400";
+    try { link = TV && TV.pairUrl ? TV.pairUrl() : url; } catch (e) { link = url; }
+    try { qr = TV && TV.qr ? TV.qr(link, 360) : ""; } catch (e) {}
+    return '<div class="fts-phone">' + (qr ? '<img class="fts-qr" src="' + qr + '" alt="">' : '<div class="fts-qr qr-ph"></div>') +
+      '<div class="fts-steps"><p><b>1</b><span>' + esc(t("fts_p1")) + '</span></p>' +
+      '<p><b>2</b><span>' + esc(t("rc_2")) + '</span></p>' +
+      '<p><b>3</b><span>' + esc(t("rc_3")) + '</span></p>' +
+      '<p class="rc-alt">' + esc(t("rc_alt")).replace("{url}", '<em class="fts-url">' + esc(url) + "</em>") + "</p></div></div>";
+  }
+  var rcTimer = 0;
+  function remoteOpen() {
+    FTS.back = zone === "drawer" ? "grid" : zone; FTS.step = "remote"; FTS.btn = 0;
+    zone = "setup"; FTS.on = true;
+    document.documentElement.classList.add("fts-on");
+    clearFocus();
+    ftsRender();
+    // the link in the QR lasts 10 minutes: draw it again now and then, so the code on screen always works
+    clearInterval(rcTimer);
+    rcTimer = setInterval(function () { if (FTS.on && FTS.step === "remote") ftsRender(); else clearInterval(rcTimer); }, 60000);
+  }
   function ftsRender() {
+    if (FTS.step === "mirror") { mirrorRender(); return; }
+    if (FTS.step === "remote") {
+      $("fts").innerHTML = '<div class="fts-c wide"><h1>' + esc(t("fts_phone")) + '</h1><p class="fts-sub">' + esc(t("rc_sub")) + "</p>" + phoneBlock() +
+        '<div class="fts-btns"><div class="fts-btn focus">' + esc(t("fts_done")) + "</div></div></div>";
+      return;
+    }
     var el = $("fts"), html = "", dots = "";
     for (var i = 0; i < 4; i++) dots += '<i class="' + (i === FTS.step ? "on" : "") + '"></i>';
     if (FTS.step === 0) {
@@ -1535,26 +1709,23 @@
         '<div class="fts-cards">' + card(0, "style-scenes.jpg", esc(t("fts_scenes")), esc(t("fts_scenes_sub"))) +
         card(1, "style-glow.jpg", esc(t("glow_style")), esc(t("fts_glow_sub"))) + "</div></div>";
     } else {
-      var ip = "", qr = "";
-      try { ip = (TV && TV.lanAddress && TV.lanAddress()) || location.hostname; } catch (e) { ip = location.hostname; }
-      var url = "http://" + ip + ":5400";
-      try { qr = TV && TV.qr ? TV.qr(url, 360) : ""; } catch (e) {}
-      html = '<div class="fts-c wide"><h1>' + esc(t("fts_phone")) + '</h1>' +
-        '<div class="fts-phone">' + (qr ? '<img class="fts-qr" src="' + qr + '" alt="">' : "") +
-        '<div class="fts-steps"><p><b>1</b><span>' + esc(t("fts_p1")) + '</span></p>' +
-        '<p><b>2</b><span>' + esc(t("fts_p2")) + ' <em class="fts-url">' + esc(url) + '</em></span></p>' +
-        '<p><b>3</b><span>' + esc(t("fts_p3")) + '</span></p></div></div>' +
+      html = '<div class="fts-c wide"><h1>' + esc(t("fts_phone")) + '</h1>' + phoneBlock() +
         '<div class="fts-btns"><div class="fts-btn' + (FTS.btn === 0 ? " focus" : "") + '">' + esc(t("fts_done")) + '</div><div class="fts-btn ghost' + (FTS.btn === 1 ? " focus" : "") + '">' + esc(t("fts_skip")) + '</div></div></div>';
     }
     el.innerHTML = html + '<div class="fts-dots">' + dots + "</div>";
   }
   function ftsMove(dx, dy) {
+    if (FTS.step === "remote") return;
+    if (FTS.step === "mirror") { if (dx) { FTS.btn = Math.max(0, Math.min(4, FTS.btn + dx)); MR.pick = FTS.btn; mirrorRender(); } return; }
     if (FTS.step === 0 && dy) { var n = window.I18N ? window.I18N.langs.length : 1; FTS.li = Math.max(0, Math.min(n - 1, FTS.li + dy)); }
     else if (FTS.step === 2 && dx) { FTS.pick = dx > 0 ? 1 : 0; glowLook(FTS.pick === 1); }
     else if (FTS.step === 3 && dx) FTS.btn = dx > 0 ? 1 : 0;
     ftsRender();
   }
   function ftsOk() {
+    // iPhone (AirPlay) works from any screen; Android and Windows need the projector's Miracast screen open
+    if (FTS.step === "mirror") { if (MR_KINDS[FTS.btn] === "miracast") mirrorClose(true); return; }
+    if (FTS.step === "remote") { mirrorClose(false); return; }
     if (FTS.step === 0) {
       var L = window.I18N, l = L && L.langs[FTS.li];
       if (l) { ST.lang = l.id; L.set(l.id); saveSettings(); staticText(); if (CLOCK24 !== clock24()) { CLOCK24 = !CLOCK24; glassShown = ""; clock(); } }
@@ -1565,10 +1736,11 @@
     else { ftsClose(); return; }
     ftsRender();
   }
-  function ftsBack() { if (FTS.step > 0) { FTS.step--; ftsRender(); } }
+  function ftsBack() { if (FTS.step === "mirror" || FTS.step === "remote") { mirrorClose(false); return; } if (FTS.step > 0) { FTS.step--; ftsRender(); } }
 
   // ---------------- the drawer under the dock ----------------
   var DR_ICON = {
+    phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.2"/><path d="M10.5 18.5h3"/><circle cx="12" cy="9" r="2.4"/><path d="M12 5.2v1.4M12 11.4v1.4M8.2 9h1.4M14.4 9h1.4"/></svg>',
     hdmi: '<svg viewBox="0 0 24 24"><path d="M7 3.5h10v6.5l-2 2v8.5H9V12l-2-2z"/><path d="M10 6.5h1M13 6.5h1"/></svg>',
     apps: '<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.4"/><circle cx="12" cy="6" r="1.4"/><circle cx="18" cy="6" r="1.4"/><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/><circle cx="6" cy="18" r="1.4"/><circle cx="12" cy="18" r="1.4"/><circle cx="18" cy="18" r="1.4"/></svg>',
     tv: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 20.5h8M7 9h10M7 12.5h6"/></svg>',
@@ -1582,7 +1754,8 @@
     { grp: 1, icon: ICONS.gear, key: "dr_home", label: "Home Settings", act: function () { closeDrawer(); openSettings(); } },
     { grp: 1, icon: DR_ICON.tv, key: "dr_tv", label: "TV Settings", act: function () { closeDrawer(); openTvSettings(); } },
     { grp: 1, icon: DR_ICON.style, key: "dr_style", label: "Minimalist Mode", act: function () { toggleGlow(); closeDrawer(); paintFocus(); } },
-    { grp: 1, icon: DR_ICON.cast, key: "dr_mirror", label: "Screen Mirroring", act: function () { startComp("com.softwinner.miracastReceiver", "com.softwinner.miracastReceiver.Miracast"); } }
+    { grp: 1, icon: DR_ICON.cast, key: "dr_mirror", label: "Screen Mirroring", act: function () { closeDrawer(); mirrorOpen(); } },
+    { grp: 1, icon: DR_ICON.phone, key: "dr_remote", label: "Phone remote", act: function () { closeDrawer(); remoteOpen(); } }
   ];
   var di = 0;
   function renderDrawer() {
@@ -1807,7 +1980,10 @@
       var row = Math.floor(g / GRID_COLS), lastRow = Math.floor((gridEls.length - 1) / GRID_COLS);
       if (dx) {
         var nx = g + dx;
-        if (nx >= 0 && nx < gridEls.length && Math.floor(nx / GRID_COLS) === row) g = nx;
+        // the dock's arrow: Right on it goes to the next page, as Enter does
+        if (dx > 0 && NIGHT && gridItems[g] && gridItems[g].kind === "next") { dockPageNo++; renderGrid(); g = dockFirst(); }
+        else if (dx < 0 && NIGHT && gridItems[g] && gridItems[g].kind === "prev") { dockPageNo--; renderGrid(); g = dockFirst(); }
+        else if (nx >= 0 && nx < gridEls.length && Math.floor(nx / GRID_COLS) === row) g = nx;
       } else if (dy < 0 && row === 0) {
         if (cards.length) zone = "shelf";
         else if (npReach()) zone = "np";
@@ -1915,6 +2091,8 @@
     var a = gridItems[g], el = gridEls[g];
     if (!a) return;
     if (a.kind === "more") { expanded = true; renderGrid(); paintFocus(); return; }
+    if (a.kind === "next") { dockPageNo++; renderGrid(); g = dockFirst(); paintFocus(); return; }
+    if (a.kind === "prev") { dockPageNo--; renderGrid(); g = dockFirst(); paintFocus(); return; }
     if (a.kind === "gear") { openGear(); return; }
     if (a.kind === "smart") { openSmart(); return; }
     if (a.kind === "screen") {
@@ -2442,7 +2620,9 @@
     if (!NIGHT) rows.push(info("apps-classic", t("apps_classic")));
     return rows;
   }
-  function setHidden(list) { HIDDEN_TV = list; ST.hidden_apps = list.slice(); saveSettings(); }
+  function setHidden(list) {
+    HIDDEN_TV = list; ST.hidden_apps = list.slice(); saveSettings();
+  }
   // OK on an app: home, then More apps, then hidden, then back on home (a screen skips hidden).
   function cycleApp(pkg) {
     var h = HIDDEN_TV.indexOf(pkg);
