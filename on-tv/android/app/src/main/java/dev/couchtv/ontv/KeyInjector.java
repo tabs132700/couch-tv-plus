@@ -18,9 +18,21 @@ import java.lang.reflect.Method;
  */
 public final class KeyInjector {
     public static void main(String[] args) throws Exception {
-        Class<?> imc = Class.forName("android.hardware.input.InputManager");
-        Object im = imc.getMethod("getInstance").invoke(null);
-        Method inject = imc.getMethod("injectInputEvent", InputEvent.class, int.class);
+        // Android 14 (API 34) and newer: InputManager.getInstance() throws a NullPointerException outside an app
+        // (there is no Context), so the key sender died at start and every press was lost. InputManagerGlobal is the
+        // part that actually talks to the system and needs no Context. Older Android keeps the old way.
+        Object im;
+        Method inject;
+        try {
+            Class<?> g = Class.forName("android.hardware.input.InputManagerGlobal");
+            im = g.getMethod("getInstance").invoke(null);
+            if (im == null) throw new IllegalStateException("InputManagerGlobal is null");
+            inject = g.getMethod("injectInputEvent", InputEvent.class, int.class);
+        } catch (Throwable t) {
+            Class<?> imc = Class.forName("android.hardware.input.InputManager");
+            im = imc.getMethod("getInstance").invoke(null);
+            inject = imc.getMethod("injectInputEvent", InputEvent.class, int.class);
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("ready");
         System.out.flush();
